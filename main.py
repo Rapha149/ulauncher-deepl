@@ -285,18 +285,21 @@ class ItemEnterListener(EventListener):
             source_lang, target_lang = data['source_lang'] or result.detected_source_lang, data['target_lang']
 
             split_result = extension.preferences['split_result']
-            if isinstance(split_result, int) and split_result is not 0:
-                parts, current = [], None
-                for word in result.text.split(' '):
-                    new_current = f'{current} {word}' if current else word
-                    if not current or len(new_current) <= split_result:
-                        current = new_current
-                    else:
-                        parts.append(current)
-                        current = word
-                parts.append(current)
-                shown_text = '\n'.join(parts)
-            else:
+            shown_text = None
+            if split_result.isnumeric():
+                split_result_int = int(split_result)
+                if split_result_int is not 0:
+                    parts, current = [], None
+                    for word in result.text.split(' '):
+                        new_current = f'{current} {word}' if current else word
+                        if not current or len(new_current) <= split_result_int:
+                            current = new_current
+                        else:
+                            parts.append(current)
+                            current = word
+                    parts.append(current)
+                    shown_text = '\n'.join(parts)
+            if not shown_text:
                 shown_text = result.text
 
             keyword = data['keyword']
