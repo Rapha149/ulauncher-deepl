@@ -1,0 +1,30 @@
+{
+  "required_api_version": "^2.0.0",
+  "name": "DeepL Translate",
+  "description": "Translate text using DeepL",
+  "developer_name": "Rapha149",
+  "icon": "images/icon.png",
+  "options": {
+    "query_debounce": 0.1
+  },
+  "preferences": [
+    {
+      "id": "keyword",
+      "type": "keyword",
+      "name": "Keyword",
+      "default_value": "tr"
+    },
+    {
+      "id": "api_key",
+      "type": "input",
+      "name": "DeepL API key"
+    },
+    {
+      "id": "split_result",
+      "type": "input",
+      "name": "Split result in lines every n characters",
+      "description": "Words won't be split. Set to 0 to disable splitting.",
+      "default_value": 75
+    }
+  ]
+}
