@@ -111,6 +111,7 @@ class DeepLExtension(Extension):
                 ExtensionResultItem(icon='images/icon.png',
                                     name='Translator could not be initialized',
                                     description='Please validate that your API key is correct.',
+                                    highlightable=False,
                                     on_enter=HideWindowAction())
             ])
 
@@ -122,6 +123,7 @@ class DeepLExtension(Extension):
                 ExtensionResultItem(icon='images/icon.png',
                                     name='An error occured',
                                     description='Please validate that your API key is correct.',
+                                    highlightable=False,
                                     on_enter=HideWindowAction())
             ])
 
@@ -129,6 +131,7 @@ class DeepLExtension(Extension):
             return RenderResultListAction([
                 ExtensionResultItem(icon='images/icon.png',
                                     name='DeepL API Usage exceeded',
+                                    highlightable=False,
                                     on_enter=HideWindowAction())
             ])
 
@@ -138,6 +141,7 @@ class DeepLExtension(Extension):
                 ExtensionResultItem(icon='images/icon.png',
                                     name='Enter text...',
                                     description=usage_str,
+                                    highlightable=False,
                                     on_enter=DoNothingAction())
             ])
 
@@ -145,6 +149,7 @@ class DeepLExtension(Extension):
             ExtensionResultItem(icon='images/icon.png',
                                 name='Translate text',
                                 description='Alt+Enter to skip input language and detect it instead.',
+                                highlightable=False,
                                 on_enter=ExtensionCustomAction({'keyword': keyword,
                                                                 'text': arg}, keep_app_open=True),
                                 on_alt_enter=ExtensionCustomAction({'keyword': keyword,
@@ -158,6 +163,7 @@ class DeepLExtension(Extension):
             items.append(ExtensionResultItem(icon='images/icon.png',
                                              name=f'Translate to {self.get_target_language_name(lang)}',
                                              description='Alt+Enter to choose input language.',
+                                             highlightable=False,
                                              on_enter=ExtensionCustomAction({'keyword': keyword,
                                                                              'text': arg,
                                                                              'source_lang': None,
@@ -203,24 +209,25 @@ class ItemEnterListener(EventListener):
         if 'reset' in data:
             return extension.on_input(data['keyword'], data['reset'])
 
+        def compare(last_languages, lang1, lang2):
+            l1, l2 = lang1.code, lang2.code
+            e1, e2 = l1 in last_languages, l2 in last_languages
+            if not e1 and not e2:
+                return 0
+            if e1 and not e2:
+                return -1
+            if not e1 and e2:
+                return 1
+            return last_languages.index(l1) - last_languages.index(l2)
+
         last_source_languages = extension.get_last_source_languages()
         last_target_languages = extension.get_last_target_languages()
         if 'source_lang' not in data:
             last_target = last_target_languages[0] if last_target_languages else None
             last_target_name = extension.get_target_language_name(last_target) if last_target else None
 
-            def compare(lang1, lang2):
-                l1, l2 = lang1.code, lang2.code
-                e1, e2 = l1 in last_source_languages, l2 in last_source_languages
-                if not e1 and not e2:
-                    return 0
-                if e1 and not e2:
-                    return -1
-                if not e1 and e2:
-                    return 1
-                return last_source_languages.index(l1) - last_source_languages.index(l2)
-
-            languages = sorted(extension.get_source_languages(), key=cmp_to_key(compare))
+            languages = sorted(extension.get_source_languages(),
+                               key=cmp_to_key(lambda lang1, lang2: compare(last_source_languages, lang1, lang2)))
             description = f'Alt+Enter to translate to {last_target_name}.' if last_target else ''
 
             detect_data = data.copy()
@@ -232,6 +239,7 @@ class ItemEnterListener(EventListener):
                 ExtensionResultItem(icon='images/icon.png',
                                     name='Detect language',
                                     description=description,
+                                    highlightable=False,
                                     on_enter=ExtensionCustomAction(detect_data, keep_app_open=True),
                                     on_alt_enter=ExtensionCustomAction(detect_alt_data, keep_app_open=True))
             ]
@@ -245,6 +253,7 @@ class ItemEnterListener(EventListener):
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate from {language.name}',
                                                  description=description,
+                                                 highlightable=False,
                                                  on_enter=ExtensionCustomAction(new_data, keep_app_open=True),
                                                  on_alt_enter=ExtensionCustomAction(new_alt_data, keep_app_open=True)))
 
@@ -253,18 +262,8 @@ class ItemEnterListener(EventListener):
             extension.set_last_source_language(data['source_lang'])
 
         if 'target_lang' not in data:
-            def compare(lang1, lang2):
-                l1, l2 = lang1.code, lang2.code
-                e1, e2 = l1 in last_target_languages, l2 in last_target_languages
-                if not e1 and not e2:
-                    return 0
-                if e1 and not e2:
-                    return -1
-                if not e1 and e2:
-                    return 1
-                return last_target_languages.index(l1) - last_target_languages.index(l2)
-
-            languages = sorted(extension.get_target_languages(), key=cmp_to_key(compare))
+            languages = sorted(extension.get_target_languages(),
+                               key=cmp_to_key(lambda lang1, lang2: compare(last_target_languages, lang1, lang2)))
 
             items = []
             for language in languages:
@@ -272,6 +271,7 @@ class ItemEnterListener(EventListener):
                 new_data['target_lang'] = language.code
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate to {language.name}',
+                                                 highlightable=False,
                                                  on_enter=ExtensionCustomAction(new_data, keep_app_open=True)))
 
             return RenderResultListAction(items)
@@ -308,6 +308,7 @@ class ItemEnterListener(EventListener):
                                     name=f'Translation: {extension.get_source_language_name(source_lang)} \u27A1 '
                                          f'{extension.get_target_language_name(target_lang)}',
                                     description=shown_text,
+                                    highlightable=False,
                                     on_enter=CopyToClipboardAction(result.text),
                                     on_alt_enter=ExtensionCustomAction({'reset': result.text,
                                                                         'keyword': keyword}, keep_app_open=True)
@@ -319,6 +320,7 @@ class ItemEnterListener(EventListener):
                                                 'language.'
                                                 '\nEnter on this item to translate again and reset the input text.'
                                                 '\nAlt+Enter on this item to translate again and keep the input text.',
+                                    highlightable=False,
                                     on_enter=SetUserQueryAction(f'{keyword} '),
                                     on_alt_enter=ExtensionCustomAction({'reset': data['text'],
                                                                         'keyword': keyword},
@@ -329,6 +331,7 @@ class ItemEnterListener(EventListener):
             return RenderResultListAction([
                 ExtensionResultItem(icon='images/icon.png',
                                     name='An error occured',
+                                    highlightable=False,
                                     on_enter=HideWindowAction())
             ])
 
