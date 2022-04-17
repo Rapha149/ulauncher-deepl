@@ -24,7 +24,7 @@
       "type": "input",
       "name": "Split result in lines every n characters",
       "description": "Words won't be split. Set to 0 to disable splitting.",
-      "default_value": 75
+      "default_value": 65
     }
   ]
 }
