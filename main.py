@@ -4,6 +4,8 @@ import time
 from functools import cmp_to_key
 from pathlib import Path
 
+from xdg.BaseDirectory import xdg_data_home
+
 from deepl import Translator, DeepLException
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
@@ -30,7 +32,7 @@ class DeepLExtension(Extension):
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterListener())
 
-        data_folder = Path.home() / '.local/share/ulauncher-deepl'
+        data_folder = Path(xdg_data_home) / 'ulauncher-deepl'
         if data_folder.is_file():
             raise IOError(f'"{str(data_folder)}" is a file.')
         if not data_folder.exists():
