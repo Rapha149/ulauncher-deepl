@@ -4,9 +4,7 @@ import time
 from functools import cmp_to_key
 from pathlib import Path
 
-from xdg.BaseDirectory import xdg_data_home
-
-from deepl import Translator, DeepLException
+from deepl import Translator, DeepLException, Formality
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
@@ -18,6 +16,7 @@ from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, SystemExitEvent, PreferencesUpdateEvent, \
     PreferencesEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from xdg.BaseDirectory import xdg_data_home
 
 LOGGER = logging.getLogger(__name__)
 
@@ -281,9 +280,14 @@ class ItemEnterListener(EventListener):
             extension.set_last_target_language(data['target_lang'])
 
         try:
+            formality = extension.preferences['formality'].lower()
+            if formality != 'more' and formality != 'less':
+                formality = Formality.DEFAULT
+
             result = extension.translator.translate_text(data['text'].strip(),
                                                          source_lang=data['source_lang'],
-                                                         target_lang=data['target_lang'])
+                                                         target_lang=data['target_lang'],
+                                                         formality=formality)
             source_lang, target_lang = data['source_lang'] or result.detected_source_lang, data['target_lang']
 
             split_result = extension.preferences['split_result']

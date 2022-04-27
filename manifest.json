@@ -25,6 +25,13 @@
       "name": "Split result in lines every n characters",
       "description": "Words won't be split. Set to 0 to disable splitting.",
       "default_value": 65
+    },
+    {
+      "id": "formality",
+      "type": "input",
+      "name": "Formality of translated text",
+      "description": "Choose from \"default\", \"less\" or \"more\"",
+      "default_value": "default"
     }
   ]
 }
