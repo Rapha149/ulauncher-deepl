@@ -282,7 +282,7 @@ class ItemEnterListener(EventListener):
             supports_formality = False
             for language in extension.get_target_languages():
                 if language.code == data['target_lang']:
-                    supports_formality = True
+                    supports_formality = language.supports_formality
             if supports_formality:
                 try:
                     formality = Formality[extension.preferences['formality'].upper()]
