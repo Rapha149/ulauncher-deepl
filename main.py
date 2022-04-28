@@ -270,6 +270,7 @@ class ItemEnterListener(EventListener):
             for language in languages:
                 new_data = data.copy()
                 new_data['target_lang'] = language.code
+                new_data['formality'] = language.supports_formality
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate to {language.name}',
                                                  highlightable=False,
@@ -280,8 +281,12 @@ class ItemEnterListener(EventListener):
             extension.set_last_target_language(data['target_lang'])
 
         try:
-            formality = extension.preferences['formality'].lower()
-            if formality != 'more' and formality != 'less':
+            if data['formality']:
+                try:
+                    formality = Formality[extension.preferences['formality'].upper()]
+                except KeyError:
+                    formality = Formality.DEFAULT
+            else:
                 formality = Formality.DEFAULT
 
             result = extension.translator.translate_text(data['text'].strip(),
