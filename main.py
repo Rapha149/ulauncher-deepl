@@ -269,8 +269,6 @@ class ItemEnterListener(EventListener):
             items = []
             for language in languages:
                 new_data = data.copy()
-                new_data['target_lang'] = language.code
-                new_data['formality'] = language.supports_formality
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate to {language.name}',
                                                  highlightable=False,
@@ -281,7 +279,11 @@ class ItemEnterListener(EventListener):
             extension.set_last_target_language(data['target_lang'])
 
         try:
-            if data['formality']:
+            supports_formality = False
+            for language in extension.get_target_languages():
+                if language.code == data['target_lang']:
+                    supports_formality = True
+            if supports_formality:
                 try:
                     formality = Formality[extension.preferences['formality'].upper()]
                 except KeyError:
