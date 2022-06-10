@@ -269,6 +269,7 @@ class ItemEnterListener(EventListener):
             items = []
             for language in languages:
                 new_data = data.copy()
+                new_data['target_lang'] = language.code
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate to {language.name}',
                                                  highlightable=False,
