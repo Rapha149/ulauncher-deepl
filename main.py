@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import math
 from functools import cmp_to_key
 from pathlib import Path
 
@@ -31,7 +32,7 @@ class DeepLExtension(Extension):
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterListener())
 
-        data_folder = Path(xdg_data_home) / 'ulauncher-deepl'
+        data_folder = Path(xdg_data_home) / 'ulauncher-deepl-test'
         if data_folder.is_file():
             raise IOError(f'"{str(data_folder)}" is a file.')
         if not data_folder.exists():
@@ -75,14 +76,14 @@ class DeepLExtension(Extension):
 
     def get_source_languages(self):
         current = time.time()
-        if current - self.last_source_language_fetch >= 600:
+        if current - self.last_source_language_fetch >= 3600:
             self.source_languages = self.translator.get_source_languages()
             self.last_source_language_fetch = current
         return self.source_languages
 
     def get_target_languages(self):
         current = time.time()
-        if current - self.last_target_language_fetch >= 600:
+        if current - self.last_target_language_fetch >= 3600:
             self.target_languages = self.translator.get_target_languages()
             self.last_target_language_fetch = current
         return self.target_languages
@@ -101,7 +102,7 @@ class DeepLExtension(Extension):
 
     def get_usage(self):
         current = time.time()
-        if current - self.last_usage_fetch >= 10:
+        if current - self.last_usage_fetch >= 20:
             self.usage = self.translator.get_usage()
             self.last_usage_fetch = current
         return self.usage
@@ -159,7 +160,14 @@ class DeepLExtension(Extension):
         ]
 
         last_target_languages = self.get_last_target_languages()
-        for i in range(min(len(last_target_languages), 3)):
+        quick_access_languages = self.preferences['quick_access_languages']
+        print(len(last_target_languages))
+        print(quick_access_languages)
+        print(int(quick_access_languages) if quick_access_languages.isnumeric() else 3)
+        print(min(len(last_target_languages),
+                  int(quick_access_languages) if quick_access_languages.isnumeric() else 3))
+        for i in range(min(len(last_target_languages),
+                           int(quick_access_languages) if quick_access_languages.isnumeric() else 3)):
             lang = last_target_languages[i]
             items.append(ExtensionResultItem(icon='images/icon.png',
                                              name=f'Translate to {self.get_target_language_name(lang)}',
@@ -174,6 +182,7 @@ class DeepLExtension(Extension):
                                                                                  'target_lang': lang},
                                                                                 keep_app_open=True)))
 
+        print(items)
         return RenderResultListAction(items)
 
 
@@ -223,6 +232,10 @@ class ItemEnterListener(EventListener):
 
         last_source_languages = extension.get_last_source_languages()
         last_target_languages = extension.get_last_target_languages()
+
+        languages_per_page_str = extension.preferences['languages_per_page']
+        languages_per_page = int(languages_per_page_str) if languages_per_page_str.isnumeric() else 10
+
         if 'source_lang' not in data:
             last_target = last_target_languages[0] if last_target_languages else None
             last_target_name = extension.get_target_language_name(last_target) if last_target else None
@@ -231,22 +244,58 @@ class ItemEnterListener(EventListener):
                                key=cmp_to_key(lambda lang1, lang2: compare(last_source_languages, lang1, lang2)))
             description = f'Alt+Enter to translate to {last_target_name}.' if last_target else ''
 
-            detect_data = data.copy()
-            detect_data['source_lang'] = None
-            detect_alt_data = detect_data.copy()
-            if last_target:
-                detect_alt_data['target_lang'] = last_target
-            items = [
-                ExtensionResultItem(icon='images/icon.png',
-                                    name='Detect language',
-                                    description=description,
-                                    highlightable=False,
-                                    on_enter=ExtensionCustomAction(detect_data, keep_app_open=True),
-                                    on_alt_enter=ExtensionCustomAction(detect_alt_data, keep_app_open=True))
-            ]
+            page = data['page'] if 'page' in data else 1
+            total_page_count = math.ceil((len(languages) + 1) / languages_per_page)
 
-            for language in languages:
+            items = []
+            if total_page_count > 1:
+                page_descriptions = []
+                next_page, previous_page = page < total_page_count, page > 1
+                if next_page:
+                    page_descriptions.append('Enter for next page')
+                if previous_page:
+                    page_descriptions.append('Alt+Enter for previous page')
+
+                page_data = data.copy()
+                page_data['page'] = page + 1
+                page_alt_data = data.copy()
+                page_alt_data['page'] = page - 1
+
+                items.append(
+                    ExtensionResultItem(
+                        icon='images/icon.png',
+                        name=f'Page {page}/{total_page_count}',
+                        description=', '.join(page_descriptions),
+                        highlightable=False,
+                        on_enter=ExtensionCustomAction(page_data, keep_app_open=True) if next_page else None,
+                        on_alt_enter=ExtensionCustomAction(page_alt_data,
+                                                           keep_app_open=True) if previous_page else None)
+                )
+
+            if page == 1:
+                detect_data = data.copy()
+                if 'page' in detect_data:
+                    del detect_data['page']
+                detect_data['source_lang'] = None
+                detect_alt_data = detect_data.copy()
+                if last_target:
+                    detect_alt_data['target_lang'] = last_target
+                items.append(
+                    ExtensionResultItem(icon='images/icon.png',
+                                        name='Detect language',
+                                        description=description,
+                                        highlightable=False,
+                                        on_enter=ExtensionCustomAction(detect_data, keep_app_open=True),
+                                        on_alt_enter=ExtensionCustomAction(detect_alt_data, keep_app_open=True))
+                )
+
+            for i in range((page - 1) * languages_per_page - (1 if page != 1 else 0),
+                           min(len(languages), page * languages_per_page - 1)):
+                language = languages[i]
+
                 new_data = data.copy()
+                if 'page' in new_data:
+                    del new_data['page']
                 new_data['source_lang'] = language.code
                 new_alt_data = new_data.copy()
                 if last_target:
@@ -266,9 +315,40 @@ class ItemEnterListener(EventListener):
             languages = sorted(extension.get_target_languages(),
                                key=cmp_to_key(lambda lang1, lang2: compare(last_target_languages, lang1, lang2)))
 
+            page = data['page'] if 'page' in data else 1
+            total_page_count = math.ceil((len(languages) + 1) / languages_per_page)
+
             items = []
-            for language in languages:
+            if total_page_count > 1:
+                page_descriptions = []
+                next_page, previous_page = page < total_page_count, page > 1
+                if next_page:
+                    page_descriptions.append('Enter for next page')
+                if previous_page:
+                    page_descriptions.append('Alt+Enter for previous page')
+
+                page_data = data.copy()
+                page_data['page'] = page + 1
+                page_alt_data = data.copy()
+                page_alt_data['page'] = page - 1
+
+                items.append(
+                    ExtensionResultItem(
+                        icon='images/icon.png',
+                        name=f'Page {page}/{total_page_count}',
+                        description=', '.join(page_descriptions),
+                        highlightable=False,
+                        on_enter=ExtensionCustomAction(page_data, keep_app_open=True) if next_page else None,
+                        on_alt_enter=ExtensionCustomAction(page_alt_data,
+                                                           keep_app_open=True) if previous_page else None)
+                )
+
+            for i in range((page - 1) * languages_per_page, min(len(languages), page * languages_per_page)):
+                language = languages[i]
+
                 new_data = data.copy()
+                if 'page' in new_data:
+                    del new_data['page']
                 new_data['target_lang'] = language.code
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name=f'Translate to {language.name}',

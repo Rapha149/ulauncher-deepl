@@ -18,6 +18,19 @@
       "id": "api_key",
       "type": "input",
       "name": "DeepL API key"
+    },{
+      "id": "quick_access_languages",
+      "type": "input",
+      "name": "Number of quick access languages",
+      "description": "Specifies how many languages to translate to are displayed for quick access.",
+      "default_value": 3
+    },
+    {
+      "id": "languages_per_page",
+      "type": "input",
+      "name": "Number of languages per page",
+      "description": "Specifies how many languages are displayed per page.",
+      "default_value": 10
     },
     {
       "id": "split_result",
