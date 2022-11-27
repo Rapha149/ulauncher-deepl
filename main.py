@@ -32,7 +32,7 @@ class DeepLExtension(Extension):
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterListener())
 
-        data_folder = Path(xdg_data_home) / 'ulauncher-deepl-test'
+        data_folder = Path(xdg_data_home) / 'ulauncher-deepl'
         if data_folder.is_file():
             raise IOError(f'"{str(data_folder)}" is a file.')
         if not data_folder.exists():
@@ -160,12 +160,7 @@ class DeepLExtension(Extension):
         ]
 
         last_target_languages = self.get_last_target_languages()
-        quick_access_languages = self.preferences['quick_access_languages']
-        print(len(last_target_languages))
-        print(quick_access_languages)
-        print(int(quick_access_languages) if quick_access_languages.isnumeric() else 3)
-        print(min(len(last_target_languages),
-                  int(quick_access_languages) if quick_access_languages.isnumeric() else 3))
+        quick_access_languages = str(self.preferences['quick_access_languages'])
         for i in range(min(len(last_target_languages),
                            int(quick_access_languages) if quick_access_languages.isnumeric() else 3)):
             lang = last_target_languages[i]
@@ -233,7 +228,7 @@ class ItemEnterListener(EventListener):
         last_source_languages = extension.get_last_source_languages()
         last_target_languages = extension.get_last_target_languages()
 
-        languages_per_page_str = extension.preferences['languages_per_page']
+        languages_per_page_str = str(extension.preferences['languages_per_page'])
         languages_per_page = int(languages_per_page_str) if languages_per_page_str.isnumeric() else 10
 
         if 'source_lang' not in data:
@@ -378,7 +373,7 @@ class ItemEnterListener(EventListener):
                                                          formality=formality)
             source_lang, target_lang = data['source_lang'] or result.detected_source_lang, data['target_lang']
 
-            split_result = extension.preferences['split_result']
+            split_result = str(extension.preferences['split_result'])
             shown_text = None
             if split_result.isnumeric():
                 split_result_int = int(split_result)
