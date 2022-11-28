@@ -7,9 +7,9 @@ A powerful DeepL translator for Ulauncher.
 - Copy the result to clipboard, translate it into another language or use the same input text again by pressing one button!
 - Up to 500000 characters per month for free! (DeepL limitations)
 
-![first step](https://user-images.githubusercontent.com/49787110/163635203-1b7db3ad-8b32-45d5-9bb6-b674a7f6212e.png)
-![second step](https://user-images.githubusercontent.com/49787110/163635231-c369147b-4161-43d7-9433-f0c206b50556.png)
-![third step](https://user-images.githubusercontent.com/49787110/163635306-6ddbf5ff-cdda-4de8-90c1-985852dbd9bc.png)
+![first step](https://user-images.githubusercontent.com/49787110/204258768-28172c1f-0b50-442f-a742-1edb3c73aa7f.png)
+![second step](https://user-images.githubusercontent.com/49787110/204258777-8973375b-2a83-4057-8b77-33dae5792c85.png)
+![third step](https://user-images.githubusercontent.com/49787110/204258791-9f51eb3f-6643-40fe-8ff2-3b557e04d9bb.png)
 
 ## Requirements
 `pip install deepl`
