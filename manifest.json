@@ -24,7 +24,7 @@
       "type": "input",
       "name": "Source language",
       "description": "Specifies how to choose the source language. Options: \"select\", \"auto\" or a language keyword.",
-      "default_value": "auto"
+      "default_value": "select"
     },
     {
       "id": "target_language",

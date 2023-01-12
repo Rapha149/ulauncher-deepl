@@ -46,7 +46,7 @@ Set to `auto` to let DeepL detect the language automatically.
 Set to `select` to select the language manually each time.  
 Set to a language code to always use that language. If you don't know the language code enter something else.
 Then the extension will tell you that it doesn't know that language code and offer you a list of codes.  
-Defaults to `auto`.
+Defaults to `select`.
 
 **Target language**  
 The language you want to translate to.  
