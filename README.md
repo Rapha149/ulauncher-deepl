@@ -12,6 +12,7 @@ A powerful DeepL translator for Ulauncher.
 ![image](https://user-images.githubusercontent.com/49787110/204258768-28172c1f-0b50-442f-a742-1edb3c73aa7f.png)
 ![image](https://user-images.githubusercontent.com/49787110/204258777-8973375b-2a83-4057-8b77-33dae5792c85.png)
 ![image](https://user-images.githubusercontent.com/49787110/204258791-9f51eb3f-6643-40fe-8ff2-3b557e04d9bb.png)
+![image](https://user-images.githubusercontent.com/49787110/212107654-d1bcd64b-215e-49bc-b636-e64d54b6fbeb.png)
 
 ## Requirements
 `pip install deepl`
