@@ -189,7 +189,7 @@ class DeepLExtension(Extension):
             ])
 
         original_arg = arg
-        match = re.search('^(?P<source>select|auto|[a-zA-Z]{2})?:(?P<target>select|[a-zA-Z]{2}(-[a-zA-Z]{2})?)?', arg,
+        match = re.search('^(?P<source>select|auto|[a-zA-Z]{2})?:(?P<target>select|[a-zA-Z]{2}(-[a-zA-Z]{2})?)? ', arg,
                           re.IGNORECASE)
         if match:
             if match['source']:
