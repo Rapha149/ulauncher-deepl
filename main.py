@@ -189,50 +189,51 @@ class DeepLExtension(Extension):
             ])
 
         original_arg = arg
-        match = re.search('^(?P<source>select|auto|[a-zA-Z]{2})?:(?P<target>select|[a-zA-Z]{2}(-[a-zA-Z]{2})?)? ', arg,
+        match = re.search('^(?P<source>select|auto|[a-zA-Z]{2})?:(?P<target>select|[a-zA-Z]{2}(-[a-zA-Z]{2})?)?(?P<space> )?', arg,
                           re.IGNORECASE)
         if match:
-            if match['source']:
-                source_lang = match['source'].upper()
-                if source_lang == 'AUTO':
-                    source_lang = None
-                    select_source_lang = False
-                elif source_lang == 'SELECT':
-                    source_lang = None
-                    select_source_lang = True
-                elif self.get_source_language_name(source_lang):
-                    select_source_lang = False
-                else:
-                    return RenderResultListAction([
-                        ExtensionResultItem(icon='images/icon.png',
-                                            name=f'Source language "{source_lang}" not found.',
-                                            description='Press Alt+Enter for a list of source languages.',
-                                            highlightable=False,
-                                            on_enter=HideWindowAction(),
-                                            on_alt_enter=ExtensionCustomAction({
-                                                'keyword': keyword,
-                                                'action': 'source_languages'}, keep_app_open=True))
-                    ])
+            if match['space']:
+                if match['source']:
+                    source_lang = match['source'].upper()
+                    if source_lang == 'AUTO':
+                        source_lang = None
+                        select_source_lang = False
+                    elif source_lang == 'SELECT':
+                        source_lang = None
+                        select_source_lang = True
+                    elif self.get_source_language_name(source_lang):
+                        select_source_lang = False
+                    else:
+                        return RenderResultListAction([
+                            ExtensionResultItem(icon='images/icon.png',
+                                                name=f'Source language "{source_lang}" not found.',
+                                                description='Press Alt+Enter for a list of source languages.',
+                                                highlightable=False,
+                                                on_enter=HideWindowAction(),
+                                                on_alt_enter=ExtensionCustomAction({
+                                                    'keyword': keyword,
+                                                    'action': 'source_languages'}, keep_app_open=True))
+                        ])
 
-            if match['target']:
-                target_lang = match['target'].upper()
-                if target_lang == 'EN':
-                    target_lang = 'EN-US'
-                if target_lang == 'SELECT':
-                    select_target_lang = True
-                elif self.get_target_language_name(target_lang):
-                    select_target_lang = False
-                else:
-                    return RenderResultListAction([
-                        ExtensionResultItem(icon='images/icon.png',
-                                            name=f'Target language "{target_lang}" not found.',
-                                            description='Press Alt+Enter for a list of target languages.',
-                                            highlightable=False,
-                                            on_enter=HideWindowAction(),
-                                            on_alt_enter=ExtensionCustomAction({
-                                                'keyword': keyword,
-                                                'action': 'target_languages'}, keep_app_open=True))
-                    ])
+                if match['target']:
+                    target_lang = match['target'].upper()
+                    if target_lang == 'EN':
+                        target_lang = 'EN-US'
+                    if target_lang == 'SELECT':
+                        select_target_lang = True
+                    elif self.get_target_language_name(target_lang):
+                        select_target_lang = False
+                    else:
+                        return RenderResultListAction([
+                            ExtensionResultItem(icon='images/icon.png',
+                                                name=f'Target language "{target_lang}" not found.',
+                                                description='Press Alt+Enter for a list of target languages.',
+                                                highlightable=False,
+                                                on_enter=HideWindowAction(),
+                                                on_alt_enter=ExtensionCustomAction({
+                                                    'keyword': keyword,
+                                                    'action': 'target_languages'}, keep_app_open=True))
+                        ])
 
             arg = arg[match.end():].strip()
 
@@ -244,6 +245,9 @@ class DeepLExtension(Extension):
                                         highlightable=False,
                                         on_enter=DoNothingAction())
                 ])
+
+            if not match['space']:
+                arg = original_arg
 
         if not select_target_lang:
             data = {
