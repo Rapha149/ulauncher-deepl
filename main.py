@@ -130,7 +130,7 @@ class DeepLExtension(Extension):
                                     on_enter=HideWindowAction())
             ])
 
-        if usage.limit_exceeded:
+        if usage.limit_reached:
             return RenderResultListAction([
                 ExtensionResultItem(icon='images/icon.png',
                                     name='DeepL API Usage exceeded',
@@ -263,7 +263,8 @@ class DeepLExtension(Extension):
 
         translate_data = {
             'keyword': keyword,
-            'text': arg
+            'text': arg,
+            'original_text': original_arg
         }
         if not select_source_lang:
             translate_data['source_lang'] = source_lang
@@ -274,10 +275,7 @@ class DeepLExtension(Extension):
                 description='Alt+Enter to skip source language and detect it instead.' if select_source_lang else '',
                 highlightable=False,
                 on_enter=ExtensionCustomAction(translate_data, keep_app_open=True),
-                on_alt_enter=ExtensionCustomAction({'keyword': keyword,
-                                                    'text': arg,
-                                                    'original_text': original_arg,
-                                                    'source_lang': None},
+                on_alt_enter=ExtensionCustomAction(translate_data | {'source_lang': None},
                                                    keep_app_open=True) if select_source_lang else None)
         ]
 
@@ -291,15 +289,9 @@ class DeepLExtension(Extension):
                 name=f'Translate to {self.get_target_language_name(lang)}',
                 description='Alt+Enter to choose source language.' if select_source_lang else '',
                 highlightable=False,
-                on_enter=ExtensionCustomAction({'keyword': keyword,
-                                                'text': arg,
-                                                'original_text': original_arg,
-                                                'source_lang': source_lang,
-                                                'target_lang': lang}, keep_app_open=True),
-                on_alt_enter=ExtensionCustomAction({'keyword': keyword,
-                                                    'text': arg,
-                                                    'original_text': original_arg,
-                                                    'target_lang': lang},
+                on_enter=ExtensionCustomAction(translate_data | {'source_lang': source_lang,
+                                                                 'target_lang': lang}, keep_app_open=True),
+                on_alt_enter=ExtensionCustomAction(translate_data | {'target_lang': lang},
                                                    keep_app_open=True) if select_source_lang else None))
 
         return RenderResultListAction(items)
